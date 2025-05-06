@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ExecAndMe | On-Demand Executive Insights</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* Reset & Base */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #f5f7fa; color: #333; }
+    a { text-decoration: none; color: inherit; }
+
+    /* Header */
+    header { background: #fff; border-bottom: 1px solid #e1e5e9; position: sticky; top: 0; z-index: 100; }
+    .header-container { max-width: 1140px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 70px; }
+    .logo { font-size: 26px; font-weight: 700; color: #2a9d8f; }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a { font-size: 14px; color: #555; font-weight: 500; transition: color .2s; }
+    .nav-links a:hover { color: #2a9d8f; }
+
+    /* Hero */
+    .hero { padding: 60px 0; }
+    .hero-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 80px 20px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #2a9d8f 0%, #264653 100%);
+      color: #fff;
+      text-align: center;
+    }
+    .hero-inner h1 { font-size: 42px; font-weight: 700; margin-bottom: 20px; }
+    .hero-inner p { font-size: 18px; margin-bottom: 30px; }
+    .btn-primary, .btn-secondary { font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 6px; transition: transform .2s; }
+    .btn-primary { background: #e9c46a; color: #264653; border: none; margin-right: 12px; }
+    .btn-secondary { background: transparent; border: 2px solid #fff; color: #fff; }
+    .btn-primary:hover, .btn-secondary:hover { transform: translateY(-2px); }
+
+    /* Sections */
+    .section { padding: 60px 20px; }
+    .section h2 { text-align: center; font-size: 28px; font-weight: 600; margin-bottom: 40px; }
+
+    /* Categories */
+    .categories-section { display: flex; justify-content: center; flex-wrap: nowrap; overflow-x: auto; gap: 24px; padding-bottom: 16px; }
+    .categories-section::-webkit-scrollbar { display: none; }
+    .category-item { text-align: center; flex: 0 0 auto; transition: transform .2s, box-shadow .2s; }
+    .category-item img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #e9c46a; object-fit: cover; }
+    .category-item span { display: block; margin-top: 8px; font-size: 13px; color: #555; }
+    .category-item:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+
+    /* Featured Executives */
+    .featured-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 30px; max-width: 1140px; margin: 0 auto; }
+    .exec-card { background: #fff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; text-align: center; transition: transform .2s, box-shadow .2s; }
+    .exec-card img { width: 100%; height: 200px; object-fit: cover; }
+    .exec-card h4 { margin: 12px 0 4px; font-size: 16px; color: #264653; text-transform: uppercase; }
+    .exec-card p { margin: 0 0 12px; font-size: 14px; font-weight: 600; }
+    .exec-card .btn { display: inline-block; margin-bottom: 16px; padding: 10px 20px; background: #2a9d8f; color: #fff; border-radius: 6px; font-size: 14px; font-weight: 600; }
+    .exec-card:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+
+    /* Testimonials */
+    #testimonials .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      max-width: 1140px;
+      margin: 0 auto;
+    }
+    .testimonial-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      font-style: italic;
+      position: relative;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .testimonial-card cite {
+      display: block;
+      margin-top: 12px;
+      text-align: right;
+      font-style: normal;
+      font-weight: 600;
+      color: #264653;
+    }
+    .testimonial-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    /* Newsletter */
+    #newsletter .newsletter-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .newsletter-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .newsletter-form input[type="email"] {
+      padding: 12px 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      flex: 1 1 200px;
+    }
+
+    /* Footer */
+    footer { background: #f1f3f5; color: #777; text-align: center; padding: 30px 20px; font-size: 14px; }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .hero-inner h1 { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Shared header -->
+  <header class="header-container">
+    <a class="logo" href="index.html">ExecAndMe</a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="browse.html">Browse</a>
+      <a href="how-it-works.html">How It Works</a>
+      <a href="sign-in.html">Sign In</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-inner">
+        <h1>On-Demand Executive Sessions</h1>
+        <p>Instant access to C-level insight, strategy calls, and mentorship from industry leaders.</p>
+        <a href="browse.html" class="btn-primary">Browse Executives</a>
+        <button class="btn-secondary">Learn How It Works</button>
+      </div>
+    </section>
+
+    <!-- Shop by Category -->
+    <section class="section">
+      <h2>Shop by Category</h2>
+      <div class="categories-section">
+        <a class="category-item" href="#"><img src="images/executive1.jpg" alt="C-Suite"><span>C-Suite</span></a>
+        <a class="category-item" href="#"><img src="images/executive2.JPG" alt="Finance"><span>Finance</span></a>
+        <a class="category-item" href="#"><img src="images/executive3.JPG" alt="Product"><span>Product</span></a>
+        <a class="category-item" href="#"><img src="images/executive4.JPG" alt="Marketing"><span>Marketing</span></a>
+        <a class="category-item" href="#"><img src="images/executive5.JPG" alt="Legal"><span>Legal</span></a>
+        <a class="category-item" href="#"><img src="images/executive6.JPG" alt="Ops"><span>Ops</span></a>
+        <a class="category-item" href="#"><img src="images/executive7.JPG" alt="Tech"><span>Tech</span></a>
+        <a class="category-item" href="#"><img src="images/executive8.JPG" alt="More"><span>More</span></a>
+      </div>
+    </section>
+
+    <!-- Featured Executives -->
+    <section class="section">
+      <h2>Featured Executives</h2>
+      <div class="featured-grid">
+        <div class="exec-card">
+          <img src="images/executive3.JPG" alt="Michael Reeves">
+          <h4>Top Booked</h4>
+          <p>Michael Reeves</p>
+          <a class="btn" href="executive-profile.html">View Profile</a>
+        </div>
+        <div class="exec-card">
+          <img src="images/executive10.JPG" alt="Vanessa Lee">
+          <h4>New & Trending</h4>
+          <p>Vanessa Lee</p>
+          <a class="btn" href="executive-profile.html">View Profile</a>
+        </div>
+        <div class="exec-card">
+          <img src="images/executive1.jpg" alt="Chris Knight">
+          <h4>Fast Response</h4>
+          <p>Chris Knight</p>
+          <a class="btn" href="executive-profile.html">View Profile</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="section" id="testimonials">
+      <h2>What Our Clients Say</h2>
+      <div class="testimonials-grid">
+        <blockquote class="testimonial-card">
+          “As an Account Manager, getting face-time with CIOs used to feel impossible. ExecAndMe booked me a 30-minute session that delivered actionable partnership strategies.”
+          <cite>— Jenna Torres, Account Manager</cite>
+        </blockquote>
+        <blockquote class="testimonial-card">
+          “I needed CMO-level marketing insights for my campaign but couldn't break through gatekeepers. One call via ExecAndMe clarified my entire launch plan.”
+          <cite>— Raj Patel, Marketing Manager</cite>
+        </blockquote>
+        <blockquote class="testimonial-card">
+          “No more waiting weeks for an intro—ExecAndMe matched me with a CRO who shared negotiation tactics I couldn’t find anywhere else.”
+          <cite>— Marcus LeBlanc, Account Manager</cite>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- Newsletter Signup -->
+    <section class="section" id="newsletter">
+      <div class="newsletter-inner">
+        <h2>Stay in the Loop</h2>
+        <p>Get the latest ExecAndMe updates and expert tips delivered straight to your inbox.</p>
+        <form action="#" class="newsletter-form">
+          <input type="email" placeholder="Your email address" required>
+          <button type="submit" class="btn-primary">Subscribe</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    &copy; 2025 ExecAndMe. All rights reserved.
+  </footer>
+</body>
+</html>

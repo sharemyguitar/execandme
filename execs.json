@@ -1,0 +1,30 @@
+[
+  {
+    "id": 3,
+    "name": "Michael Reeves",
+    "title": "CEO, FinEdge",
+    "tag": "Top Booked",
+    "image": "images/executive3.JPG"
+  },
+  {
+    "id": 10,
+    "name": "Vanessa Lee",
+    "title": "CFO, DataWave",
+    "tag": "New & Trending",
+    "image": "images/executive10.JPG"
+  },
+  {
+    "id": 1,
+    "name": "Chris Knight",
+    "title": "CTO, SecureOps",
+    "tag": "Fast Response",
+    "image": "images/executive1.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Emma Brooks",
+    "title": "CMO, MarketFlow",
+    "tag": "Top Rated",
+    "image": "images/executive2.JPG"
+  }
+]
