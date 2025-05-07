@@ -8,21 +8,21 @@ export const authOptions = {
       clientId:     process.env.LINKEDIN_CLIENT_ID,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
 
-      // override the issuer so NextAuth will accept LinkedIn's id_token
+      // Accept LinkedIn’s OIDC issuer so the ID token is validated correctly
       issuer:       "https://www.linkedin.com/oauth",
 
-      // only request the OpenID Connect scopes your app has approved
+      // Only ask for the OpenID Connect scopes your app has been approved for
       authorization: {
         params: { scope: "openid profile email" },
       },
 
+      // Map the OIDC claims into NextAuth’s user object
       profile(profile) {
-        // OIDC fields from LinkedIn
         return {
-          id:    profile.sub,
-          name:  `${profile.given_name} ${profile.family_name}`,
-          email: profile.email,
-          image: profile.picture,
+          id:    profile.sub,                   // OIDC “subject”
+          name:  profile.name,                  // OIDC “name”
+          email: profile.email,                 // OIDC “email”
+          image: profile.picture,               // OIDC “picture”
         }
       },
     }),
@@ -30,7 +30,7 @@ export const authOptions = {
 
   callbacks: {
     async signIn({ user }) {
-      // upsert your executive in your own DB
+      // Upsert the executive into your database
       await fetch(`${process.env.NEXTAUTH_URL}/api/executives/upsert`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
