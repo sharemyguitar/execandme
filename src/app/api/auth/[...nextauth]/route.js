@@ -3,33 +3,20 @@ import NextAuth from "next-auth"
 import LinkedInProvider from "next-auth/providers/linkedin"
 
 export const authOptions = {
-  debug: true, // Turn on next-auth debugging
+  debug: true, // helps see detailed logs
 
   providers: [
     LinkedInProvider({
       clientId:     process.env.LINKEDIN_CLIENT_ID,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-
-      // Tell next-auth to accept LinkedIn's OIDC issuer
-      issuer: "https://www.linkedin.com/oauth",
-
-      // Only ask for the OIDC scopes your app is approved for
-      authorization: {
-        params: {
-          scope: "openid profile email",
-        },
-      },
-
-      // Map LinkedIn's profile into next-auth's User
+      issuer:       "https://www.linkedin.com/oauth",
+      authorization: { params: { scope: "openid profile email" } },
       profile(profile) {
         return {
-          id:    profile.id,
-          name:  `${profile.localizedFirstName} ${profile.localizedLastName}`,
-          email: profile.emailAddress,
-          image: profile.profilePicture["displayImage~"]
-                    .elements[0]
-                    .identifiers[0]
-                    .identifier,
+          id:    profile.sub,
+          name:  profile.name,
+          email: profile.email,
+          image: profile.picture,
         }
       },
     }),
@@ -37,7 +24,6 @@ export const authOptions = {
 
   callbacks: {
     async signIn({ user }) {
-      // Upsert into your app's DB
       await fetch(`${process.env.NEXTAUTH_URL}/api/executives/upsert`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
