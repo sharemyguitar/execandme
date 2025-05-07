@@ -8,7 +8,7 @@ export const authOptions = {
       clientId: process.env.LINKEDIN_CLIENT_ID,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
 
-      // Tell LinkedIn to return both basic profile info and email
+      // 🔒 Only request the scopes your LinkedIn app has approved
       authorization: {
         params: {
           scope: "r_liteprofile r_emailaddress",
