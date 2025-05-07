@@ -8,10 +8,10 @@ export const authOptions = {
       clientId: process.env.LINKEDIN_CLIENT_ID,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
 
-      // 🔒 Only request the scopes your LinkedIn app has approved
+      // 🔒 Only request the OpenID Connect scopes your app is approved for:
       authorization: {
         params: {
-          scope: "r_liteprofile r_emailaddress",
+          scope: "openid profile email",
         },
       },
 
