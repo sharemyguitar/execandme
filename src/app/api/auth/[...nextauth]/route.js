@@ -1,72 +1,58 @@
 // src/app/api/auth/[...nextauth]/route.js
-import NextAuth from "next-auth";
-import LinkedInProvider from "next-auth/providers/linkedin";
+import NextAuth from "next-auth"
+import OAuthProvider from "next-auth/providers/oauth"
 
 export const authOptions = {
   providers: [
-    LinkedInProvider({
-      // ⚙️ your credentials
-      clientId: process.env.LINKEDIN_CLIENT_ID,
-      clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-
-      // 🚩 accept LinkedIn’s OIDC issuer
-      issuer: "https://www.linkedin.com/oauth",
-
-      // 🔒 only ask for the OIDC scopes you were approved for
+    OAuthProvider({
+      id: "linkedin",
+      name: "LinkedIn",
+      type: "oauth",
+      version: "2.0",
+      scope: "r_liteprofile r_emailaddress",
+      params: { grant_type: "authorization_code" },
       authorization: {
-        params: {
-          scope: "openid profile email",
-        },
+        url: "https://www.linkedin.com/oauth/v2/authorization",
+        params: { response_type: "code" },
       },
-
-      // map the OIDC ID token claims into our NextAuth user
-      profile(profile) {
+      token: "https://www.linkedin.com/oauth/v2/accessToken",
+      userinfo: "https://api.linkedin.com/v2/me?projection=(id,localizedFirstName,localizedLastName,profilePicture(displayImage~:playableStreams))",
+      // fetch email separately
+      async profile(profile, tokens) {
+        // fetch email with the access token
+        const res = await fetch(
+          "https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))",
+          { headers: { Authorization: `Bearer ${tokens.access_token}` } }
+        )
+        const data = await res.json()
         return {
-          // `sub` is the OIDC subject (LinkedIn member ID)
-          id:    profile.sub,
-          // standard full name claim
-          name:  profile.name,
-          // standard email claim
-          email: profile.email,
-          // standard picture claim
-          image: profile.picture,
-        };
-      },
-
-      /*
-      // If you ever switch back to the old REST API response, you can
-      // restore this mapping instead:
-      profile(profile) {
-        return {
-          id:    profile.id,
-          name:  `${profile.localizedFirstName} ${profile.localizedLastName}`,
-          email: profile.emailAddress,
-          image: profile.profilePicture["displayImage~"]
-                    .elements[0]
-                    .identifiers[0]
-                    .identifier,
+          id: profile.id,
+          name: `${profile.localizedFirstName} ${profile.localizedLastName}`,
+          email: data.elements?.[0]["handle~"]?.emailAddress,
+          image:
+            profile.profilePicture["displayImage~"].elements[0].identifiers[0]
+              .identifier,
         }
       },
-      */
+      clientId: process.env.LINKEDIN_CLIENT_ID,
+      clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
     }),
   ],
-
   callbacks: {
     async signIn({ user }) {
-      // upsert into your own DB
       await fetch(`${process.env.NEXTAUTH_URL}/api/executives/upsert`, {
-        method:  "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
+        body: JSON.stringify({
           linkedInId: user.id,
-          name:       user.name,
-          photoUrl:   user.image,
+          name: user.name,
+          photoUrl: user.image,
         }),
-      });
-      return true;
+      })
+      return true
     },
   },
-};
+}
 
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+const handler = NextAuth(authOptions)
+export { handler as GET, handler as POST }
