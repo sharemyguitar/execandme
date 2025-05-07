@@ -3,14 +3,22 @@ import NextAuth from "next-auth"
 import LinkedInProvider from "next-auth/providers/linkedin"
 
 export const authOptions = {
-  debug: true, // helps see detailed logs
+  debug: true,
 
   providers: [
     LinkedInProvider({
       clientId:     process.env.LINKEDIN_CLIENT_ID,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
+
+      // Accept LinkedIn’s OIDC issuer
       issuer:       "https://www.linkedin.com/oauth",
-      authorization: { params: { scope: "openid profile email" } },
+
+      // Only request the three OIDC scopes you have
+      authorization: {
+        params: { scope: "openid profile email" },
+      },
+
+      // Map the OIDC token claims into the NextAuth user
       profile(profile) {
         return {
           id:    profile.sub,
@@ -24,6 +32,7 @@ export const authOptions = {
 
   callbacks: {
     async signIn({ user }) {
+      // Upsert your executive record
       await fetch(`${process.env.NEXTAUTH_URL}/api/executives/upsert`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
