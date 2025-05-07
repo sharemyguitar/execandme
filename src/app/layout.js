@@ -1,23 +1,23 @@
 // src/app/layout.js
-import './globals.css';
-import { SessionProvider } from 'next-auth/react';       // ← add this
-import Header from '../components/Header';
+import "./globals.css"
+import Header from "../components/Header"
+import Providers from "../components/Providers"
 
 export const metadata = {
-  title: 'ExecAndMe | On-Demand Executive Insights',
+  title: "ExecAndMe | On-Demand Executive Insights",
   description:
-    'Instant access to C-level insight, strategy calls, and mentorship from industry leaders.',
-};
+    "Instant access to C-level insight, strategy calls, and mentorship from industry leaders.",
+}
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children, session }) {
   return (
     <html lang="en">
       <body>
-        <SessionProvider>                                {/* ← wrap */}
+        <Providers session={session}>
           <Header />
           {children}
-        </SessionProvider>                               {/* ← wrap */}
+        </Providers>
       </body>
     </html>
-  );
+  )
 }
