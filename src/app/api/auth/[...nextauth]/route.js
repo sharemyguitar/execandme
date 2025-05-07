@@ -3,36 +3,35 @@ import NextAuth from "next-auth";
 import LinkedInProvider from "next-auth/providers/linkedin";
 
 export const authOptions = {
-  // Tell NextAuth which providers to use
   providers: [
     LinkedInProvider({
       clientId: process.env.LINKEDIN_CLIENT_ID,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
 
-      // 🔒 Only request the OpenID Connect scopes your app is approved for
+      // 🔒 Only ask for the OIDC scopes your app has approval for
       authorization: {
         params: {
           scope: "openid profile email",
         },
       },
 
-      // Map LinkedIn’s returned profile into NextAuth’s User object
+      // Map the ID token / OIDC profile into NextAuth's User
       profile(profile) {
         return {
-          id: profile.id,
-          name: `${profile.localizedFirstName} ${profile.localizedLastName}`,
-          email: profile.emailAddress,
-          image:
-            profile.profilePicture["displayImage~"].elements[0].identifiers[0]
-              .identifier,
+          // 'sub' is the standard OIDC user ID
+          id: profile.sub,
+          // name/email/picture are returned by the OIDC endpoint
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
         };
       },
     }),
   ],
 
   callbacks: {
-    // After sign-in, upsert the executive into your own DB
     async signIn({ user }) {
+      // Upsert your executive record in your own DB
       await fetch(`${process.env.NEXTAUTH_URL}/api/executives/upsert`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
