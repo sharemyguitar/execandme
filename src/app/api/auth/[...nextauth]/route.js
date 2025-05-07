@@ -7,31 +7,34 @@ export const authOptions = {
     LinkedInProvider({
       clientId: process.env.LINKEDIN_CLIENT_ID,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-
-      // 🔒 ask for only the OpenID Connect scopes your app is approved for
       authorization: {
         params: {
+          // only the OpenID Connect scopes your app is approved to use:
           scope: "openid profile email",
         },
       },
-
-      // Map the OIDC profile into our user object
-      profile(profile) {
-        return {
-          id: profile.sub ?? profile.id,
-          name: `${profile.name?.given_name ?? profile.localizedFirstName} ${profile.name?.family_name ?? profile.localizedLastName}`,
-          email: profile.email ?? profile.emailAddress,
-          image: profile.picture ?? (
-            profile.profilePicture?.["displayImage~"]?.elements?.[0]?.identifiers?.[0]?.identifier
-          ),
-        }
-      },
     }),
   ],
-
   callbacks: {
-    async signIn({ user }) {
-      // Upsert your exec in your own DB
+    async session({ session, token }) {
+      // You now get name/email/picture from token.claims
+      session.user = {
+        id: token.sub,
+        name: session.user.name,    // from OIDC
+        email: session.user.email,  // from OIDC
+        image: session.user.image,  // from OIDC
+      }
+      return session
+    },
+    async jwt({ token, user, account }) {
+      // On the first sign in, merge in any user/account props you want
+      if (account && user) {
+        token.sub = user.id
+      }
+      return token
+    },
+    async signIn({ user, account }) {
+      // your upsert remains the same
       await fetch(`${process.env.NEXTAUTH_URL}/api/executives/upsert`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
