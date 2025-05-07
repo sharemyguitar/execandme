@@ -5,43 +5,46 @@ import LinkedInProvider from "next-auth/providers/linkedin"
 export const authOptions = {
   providers: [
     LinkedInProvider({
-      clientId: process.env.LINKEDIN_CLIENT_ID,
+      // ⚙️ your credentials
+      clientId:     process.env.LINKEDIN_CLIENT_ID,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
+
+      // 🚩 override the expected issuer so NextAuth’s JWT validator
+      //     accepts LinkedIn’s id_token
+      issuer: "https://www.linkedin.com/oauth",
+
+      // 🔒 only ask for the OIDC scopes you were approved for
       authorization: {
         params: {
-          // only the OpenID Connect scopes your app is approved to use:
           scope: "openid profile email",
         },
       },
+
+      // map LinkedIn’s response to our “user” object
+      profile(profile) {
+        return {
+          id:    profile.id,
+          name:  `${profile.localizedFirstName} ${profile.localizedLastName}`,
+          email: profile.emailAddress,
+          image: profile.profilePicture["displayImage~"]
+                    .elements[0]
+                    .identifiers[0]
+                    .identifier,
+        }
+      },
     }),
   ],
+
   callbacks: {
-    async session({ session, token }) {
-      // You now get name/email/picture from token.claims
-      session.user = {
-        id: token.sub,
-        name: session.user.name,    // from OIDC
-        email: session.user.email,  // from OIDC
-        image: session.user.image,  // from OIDC
-      }
-      return session
-    },
-    async jwt({ token, user, account }) {
-      // On the first sign in, merge in any user/account props you want
-      if (account && user) {
-        token.sub = user.id
-      }
-      return token
-    },
-    async signIn({ user, account }) {
-      // your upsert remains the same
+    async signIn({ user }) {
+      // upsert into your own DB
       await fetch(`${process.env.NEXTAUTH_URL}/api/executives/upsert`, {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body:    JSON.stringify({
           linkedInId: user.id,
-          name: user.name,
-          photoUrl: user.image,
+          name:       user.name,
+          photoUrl:   user.image,
         }),
       })
       return true
