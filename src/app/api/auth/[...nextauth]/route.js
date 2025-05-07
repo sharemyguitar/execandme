@@ -3,6 +3,7 @@ import NextAuth from "next-auth"
 import OAuthProvider from "next-auth/providers/oauth"
 
 export const authOptions = {
+  debug: true,       // ← turn on verbose debug logs
   providers: [
     OAuthProvider({
       id: "linkedin",
@@ -16,19 +17,19 @@ export const authOptions = {
         params: { response_type: "code" },
       },
       token: "https://www.linkedin.com/oauth/v2/accessToken",
-      userinfo: "https://api.linkedin.com/v2/me?projection=(id,localizedFirstName,localizedLastName,profilePicture(displayImage~:playableStreams))",
-      // fetch email separately
+      userinfo:
+        "https://api.linkedin.com/v2/me?projection=(id,localizedFirstName,localizedLastName,profilePicture(displayImage~:playableStreams))",
       async profile(profile, tokens) {
-        // fetch email with the access token
+        // pull email out of its own endpoint
         const res = await fetch(
           "https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))",
           { headers: { Authorization: `Bearer ${tokens.access_token}` } }
         )
-        const data = await res.json()
+        const json = await res.json()
         return {
           id: profile.id,
           name: `${profile.localizedFirstName} ${profile.localizedLastName}`,
-          email: data.elements?.[0]["handle~"]?.emailAddress,
+          email: json.elements?.[0]["handle~"]?.emailAddress,
           image:
             profile.profilePicture["displayImage~"].elements[0].identifiers[0]
               .identifier,
