@@ -1,6 +1,6 @@
 // src/app/api/auth/[...nextauth]/route.js
-import NextAuth from "next-auth";
-import LinkedInProvider from "next-auth/providers/linkedin";
+import NextAuth from "next-auth"
+import LinkedInProvider from "next-auth/providers/linkedin"
 
 export const authOptions = {
   providers: [
@@ -8,23 +8,21 @@ export const authOptions = {
       clientId: process.env.LINKEDIN_CLIENT_ID,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
 
-      // 🔒 Only ask for the OIDC scopes your app has approval for
+      // 🔒 Only request the OpenID Connect scopes your LinkedIn app is approved for
       authorization: {
         params: {
           scope: "openid profile email",
         },
       },
 
-      // Map the ID token / OIDC profile into NextAuth's User
+      // Map LinkedIn’s OIDC profile shape into NextAuth’s User
       profile(profile) {
         return {
-          // 'sub' is the standard OIDC user ID
-          id: profile.sub,
-          // name/email/picture are returned by the OIDC endpoint
+          id: profile.sub, // OIDC “subject” claim
           name: profile.name,
           email: profile.email,
           image: profile.picture,
-        };
+        }
       },
     }),
   ],
@@ -40,11 +38,11 @@ export const authOptions = {
           name: user.name,
           photoUrl: user.image,
         }),
-      });
-      return true;
+      })
+      return true
     },
   },
-};
+}
 
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+const handler = NextAuth(authOptions)
+export { handler as GET, handler as POST }
