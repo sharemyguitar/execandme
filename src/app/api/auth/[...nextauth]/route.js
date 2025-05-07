@@ -1,16 +1,15 @@
 // src/app/api/auth/[...nextauth]/route.js
-import NextAuth from "next-auth"
-import LinkedInProvider from "next-auth/providers/linkedin"
+import NextAuth from "next-auth";
+import LinkedInProvider from "next-auth/providers/linkedin";
 
 export const authOptions = {
   providers: [
     LinkedInProvider({
       // ⚙️ your credentials
-      clientId:     process.env.LINKEDIN_CLIENT_ID,
+      clientId: process.env.LINKEDIN_CLIENT_ID,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
 
-      // 🚩 override the expected issuer so NextAuth’s JWT validator
-      //     accepts LinkedIn’s id_token
+      // 🚩 accept LinkedIn’s OIDC issuer
       issuer: "https://www.linkedin.com/oauth",
 
       // 🔒 only ask for the OIDC scopes you were approved for
@@ -20,7 +19,23 @@ export const authOptions = {
         },
       },
 
-      // map LinkedIn’s response to our “user” object
+      // map the OIDC ID token claims into our NextAuth user
+      profile(profile) {
+        return {
+          // `sub` is the OIDC subject (LinkedIn member ID)
+          id:    profile.sub,
+          // standard full name claim
+          name:  profile.name,
+          // standard email claim
+          email: profile.email,
+          // standard picture claim
+          image: profile.picture,
+        };
+      },
+
+      /*
+      // If you ever switch back to the old REST API response, you can
+      // restore this mapping instead:
       profile(profile) {
         return {
           id:    profile.id,
@@ -32,6 +47,7 @@ export const authOptions = {
                     .identifier,
         }
       },
+      */
     }),
   ],
 
@@ -46,11 +62,11 @@ export const authOptions = {
           name:       user.name,
           photoUrl:   user.image,
         }),
-      })
-      return true
+      });
+      return true;
     },
   },
-}
+};
 
-const handler = NextAuth(authOptions)
-export { handler as GET, handler as POST }
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
