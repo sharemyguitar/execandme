@@ -1,65 +1,94 @@
 // File: pages/api/auth/[...nextauth].js
 
 import NextAuth from "next-auth"
-import OIDCProvider from "next-auth/providers/oidc"
+
+console.log("🔑 NextAuth config loaded at", new Date())
 
 export default NextAuth({
-  // turn on debug logging while you verify
-  debug: true,
-
-  // supply a NEXTAUTH_SECRET in your env
+  // used to sign cookies and tokens
   secret: process.env.NEXTAUTH_SECRET,
 
-  // configure your LinkedIn OIDC provider
-  providers: [
-    OIDCProvider({
-      id: "linkedin",
-      name: "LinkedIn",
+  // turn on debug so you see each step in your logs
+  debug: true,
 
-      // LinkedIn’s v2 OIDC issuer & discovery URL
-      issuer:   "https://www.linkedin.com/oauth/v2",
-      wellKnown:
-        "https://www.linkedin.com/oauth/v2/.well-known/openid-configuration",
+  providers: [
+    {
+      id:      "linkedin",
+      name:    "LinkedIn",
+      type:    "oauth",
+      version: "2.0",
+
+      // 1) Ask for the legacy scopes, not openid
+      authorization: {
+        url: "https://www.linkedin.com/oauth/v2/authorization",
+        params: {
+          response_type: "code",
+          scope:         "r_liteprofile r_emailaddress"
+        }
+      },
+
+      // 2) Token exchange endpoint
+      token: "https://www.linkedin.com/oauth/v2/accessToken",
+
+      // 3) We’ll fetch profile+email ourselves—leave userinfo blank
+      userinfo: "",
 
       clientId:     process.env.LINKEDIN_CLIENT_ID,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
 
-      // request the OIDC scopes you’ve been granted
-      authorization: {
-        params: {
-          scope: "openid profile email"
-        }
-      },
+      // 4) Build the user object from LinkedIn’s REST APIs
+      async profile(profile, tokens) {
+        // fetch the “me” endpoint
+        const meRes = await fetch(
+          "https://api.linkedin.com/v2/me?projection=(id,localizedFirstName,localizedLastName,profilePicture(displayImage~:playableStreams))",
+          { headers: { Authorization: `Bearer ${tokens.access_token}` } }
+        )
+        const me = await meRes.json()
 
-      // enforce PKCE + state checks
-      checks: ["pkce", "state"]
-    })
+        // fetch the email endpoint
+        const emailRes = await fetch(
+          "https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))",
+          { headers: { Authorization: `Bearer ${tokens.access_token}` } }
+        )
+        const emailJson = await emailRes.json()
+        const email =
+          emailJson.elements?.[0]?.["handle~"]?.emailAddress || null
+
+        return {
+          id:    me.id,
+          name:  `${me.localizedFirstName} ${me.localizedLastName}`,
+          email,
+          image:
+            me.profilePicture?.["displayImage~"]?.elements?.[0]
+              ?.identifiers?.[0]?.identifier ||
+            null
+        }
+      }
+    }
   ],
 
-  // custom logger so you can see exactly what’s happening
-  logger: {
-    error(code, ...rest) {
-      console.error("NextAuth Error:", code, ...rest)
-    },
-    warn(code, ...rest) {
-      console.warn("NextAuth Warn:", code, ...rest)
-    },
-    debug(code, ...rest) {
-      console.debug("NextAuth Debug:", code, ...rest)
-    }
-  },
-
-  // persist the access token in the JWT & session if you need it
+  // 5) Persist access token if you need it
   callbacks: {
     async jwt({ token, account }) {
-      if (account) {
-        token.accessToken = account.access_token
-      }
+      if (account) token.accessToken = account.access_token
       return token
     },
     async session({ session, token }) {
       session.user.accessToken = token.accessToken
       return session
+    }
+  },
+
+  // 6) Log everything so you can see any errors
+  logger: {
+    error(code, ...rest) {
+      console.error("NextAuth Error:", code, ...rest)
+    },
+    warn(code, ...rest) {
+      console.warn ("NextAuth Warn: ", code, ...rest)
+    },
+    debug(code, ...rest) {
+      console.debug("NextAuth Debug:", code, ...rest)
     }
   }
 })
