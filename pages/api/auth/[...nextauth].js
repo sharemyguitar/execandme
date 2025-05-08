@@ -1,45 +1,65 @@
-// pages/api/auth/[...nextauth].js
+// File: pages/api/auth/[...nextauth].js
+
 import NextAuth from "next-auth"
-import LinkedInProvider from "next-auth/providers/linkedin"
+import OIDCProvider from "next-auth/providers/oidc"
 
 export default NextAuth({
+  // turn on debug logging while you verify
+  debug: true,
+
+  // supply a NEXTAUTH_SECRET in your env
+  secret: process.env.NEXTAUTH_SECRET,
+
+  // configure your LinkedIn OIDC provider
   providers: [
-    LinkedInProvider({
+    OIDCProvider({
+      id: "linkedin",
+      name: "LinkedIn",
+
+      // LinkedIn’s v2 OIDC issuer & discovery URL
+      issuer:   "https://www.linkedin.com/oauth/v2",
+      wellKnown:
+        "https://www.linkedin.com/oauth/v2/.well-known/openid-configuration",
+
       clientId:     process.env.LINKEDIN_CLIENT_ID,
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
 
-      // override to match LinkedIn’s OIDC issuer
-      issuer:        "https://www.linkedin.com/oauth",
-      authorization: { params: { scope: "openid profile email" } },
-
-      profile(profile) {
-        return {
-          id:    profile.id,
-          name:  `${profile.localizedFirstName} ${profile.localizedLastName}`,
-          email: profile.emailAddress,
-          image: profile
-            .profilePicture["displayImage~"]
-            .elements[0]
-            .identifiers[0]
-            .identifier,
+      // request the OIDC scopes you’ve been granted
+      authorization: {
+        params: {
+          scope: "openid profile email"
         }
       },
-    }),
+
+      // enforce PKCE + state checks
+      checks: ["pkce", "state"]
+    })
   ],
-  callbacks: {
-    async signIn({ user }) {
-      await fetch(`${process.env.NEXTAUTH_URL}/api/executives/upsert`, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
-          linkedInId: user.id,
-          name:       user.name,
-          photoUrl:   user.image,
-        }),
-      })
-      return true
+
+  // custom logger so you can see exactly what’s happening
+  logger: {
+    error(code, ...rest) {
+      console.error("NextAuth Error:", code, ...rest)
     },
+    warn(code, ...rest) {
+      console.warn("NextAuth Warn:", code, ...rest)
+    },
+    debug(code, ...rest) {
+      console.debug("NextAuth Debug:", code, ...rest)
+    }
   },
-  secret: process.env.NEXTAUTH_SECRET,
-  debug:  process.env.NODE_ENV === "development",
+
+  // persist the access token in the JWT & session if you need it
+  callbacks: {
+    async jwt({ token, account }) {
+      if (account) {
+        token.accessToken = account.access_token
+      }
+      return token
+    },
+    async session({ session, token }) {
+      session.user.accessToken = token.accessToken
+      return session
+    }
+  }
 })
