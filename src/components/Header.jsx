@@ -1,4 +1,3 @@
-// components/Header.jsx
 'use client';
 
 import Link from 'next/link';
@@ -15,6 +14,7 @@ export default function Header() {
         <Link href="/">Home</Link>
         <Link href="/browse">Browse</Link>
         <Link href="/how-it-works">How It Works</Link>
+        <Link href="/privacy-policy">Privacy Policy</Link>
         {status === 'authenticated' && (
           <Link href="/dashboard">My Profile</Link>
         )}
@@ -22,17 +22,11 @@ export default function Header() {
 
       <div>
         {status === 'loading' ? null : session ? (
-          <button
-            onClick={() => signOut()}
-            className="btn-secondary"
-          >
+          <button onClick={() => signOut()} className="btn btn-secondary">
             Sign out
           </button>
         ) : (
-          <button
-            onClick={() => signIn('linkedin')}
-            className="btn-primary"
-          >
+          <button onClick={() => signIn('linkedin')} className="btn btn-primary">
             Sign in with LinkedIn
           </button>
         )}
