@@ -1,9 +1,25 @@
-<div class="header-container">
-  <a class="logo" href="/">ExecAndMe</a>
-  <nav class="nav-links">
-    <a href="/">Home</a>
-    <a href="/browse">Browse</a>
-    <a href="/how-it-works">How It Works</a>
-    <a href="/sign-in">Sign In</a>
-  </nav>
-</div>
+<!-- public/header.html (or wherever you’re dropping static markup) -->
+<header class="header-container">
+  <a href="/" class="logo">ExecAndMe</a>
+
+  <div class="nav-center">
+    <nav class="nav-links">
+      <a href="/browse">Browse</a>
+      <a href="/how-it-works">How It Works</a>
+      <a href="/categories">Categories ▾</a>
+    </nav>
+    <form class="search-form" action="/search" method="get">
+      <input
+        type="text"
+        name="q"
+        class="search-input"
+        placeholder="Search Execs…"
+      />
+    </form>
+  </div>
+
+  <div class="auth-links">
+    <a href="/api/auth/signin" class="btn-text">Log In</a>
+    <a href="/api/auth/signin" class="btn-signup">Sign Up</a>
+  </div>
+</header>

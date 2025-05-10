@@ -1,19 +1,15 @@
-// pages/api/auth/[...nextauth].js
 import NextAuth from "next-auth"
-import LinkedInProvider from "next-auth/providers/linkedin"
+import GoogleProvider from "next-auth/providers/google"
 
 export default NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
+  debug: true,
   providers: [
-    LinkedInProvider({
-      clientId: process.env.LINKEDIN_CLIENT_ID,
-      clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-      authorization: {
-        params: {
-          scope: "r_liteprofile",   // ← ensure ONLY this scope
-        },
-      },
+    GoogleProvider({
+      clientId:     process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorization: { params: { scope: "openid profile email" } },
     }),
   ],
-  debug: true,               // to see errors in Vercel logs
+  // (keep any callbacks you had for sessions/jwt)
 })
